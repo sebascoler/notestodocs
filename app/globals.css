@@ -18,6 +18,11 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  overscroll-behavior: none; /* Evita pull-to-refresh en iPad */
+  -webkit-user-select: none;
+  user-select: none;
+  height: 100dvh;
+  overflow: hidden;
 }
 
 @layer utilities {
