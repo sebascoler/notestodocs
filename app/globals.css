@@ -18,7 +18,11 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
-  overscroll-behavior: none; /* Evita pull-to-refresh en iPad */
+}
+
+/* Canvas page: locked viewport, no scroll, no pull-to-refresh */
+body.canvas-page {
+  overscroll-behavior: none;
   -webkit-user-select: none;
   user-select: none;
   height: 100dvh;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession, signIn, signOut } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
@@ -14,6 +14,12 @@ type Status = "idle" | "processing" | "done" | "error";
 export default function Home() {
   const { data: session, status } = useSession();
   const [processStatus, setProcessStatus] = useState<Status>("idle");
+
+  // Lock the body to full-screen while on the canvas page
+  useEffect(() => {
+    document.body.classList.add("canvas-page");
+    return () => document.body.classList.remove("canvas-page");
+  }, []);
   const [docUrl, setDocUrl] = useState<string | null>(null);
   const [detectedText, setDetectedText] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);

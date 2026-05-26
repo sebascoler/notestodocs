@@ -2,228 +2,287 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 const API_URL = process.env.NEXTAUTH_URL || "https://notestodocs.vercel.app";
-const API_KEY = process.env.API_KEY || "(no configurado - anade API_KEY en Vercel)";
+const API_KEY = process.env.API_KEY || "no configurado — falta API_KEY en Vercel";
 const ENDPOINT = `${API_URL}/api/process`;
-const SERVICE_ACCOUNT_EMAIL =
+const SA_EMAIL =
   process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || "(email del service account)";
 
 export default function SetupPage() {
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-4">
-      <div className="max-w-2xl mx-auto space-y-8">
+    <div className="bg-gray-50 min-h-screen">
+      <div className="max-w-xl mx-auto px-5 py-10 pb-24 space-y-6">
 
-        {/* Header */}
-        <div>
-          <Link href="/" className="text-sm text-blue-600 hover:underline">
-            &larr; Volver al canvas
-          </Link>
-          <h1 className="text-2xl font-bold text-gray-900 mt-2">Configurar iOS Shortcut</h1>
-          <p className="text-gray-500 mt-1 text-sm">
-            Conecta <strong>Freeform</strong> o <strong>Notas de Apple</strong> con Google Docs en 5 minutos.
+        {/* Nav */}
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1 text-sm text-blue-600 font-medium"
+        >
+          &larr; Volver al canvas
+        </Link>
+
+        {/* Title */}
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold text-gray-900 leading-tight">
+            Configurar Shortcut
+          </h1>
+          <p className="text-base text-gray-500">
+            Conecta <strong className="text-gray-700">Freeform</strong> o{" "}
+            <strong className="text-gray-700">Notas de Apple</strong> con Google Docs.
           </p>
         </div>
 
-        {/* Step 0 */}
-        <Section number="0" title="Que app usar en el iPad?">
+        {/* App choice */}
+        <Card>
+          <SectionTitle number="0" text="Que app usar en el iPad" />
           <div className="grid grid-cols-2 gap-3 mt-3">
-            <AppCard
+            <AppTile
               emoji="🎨"
               name="Freeform"
-              badge="Recomendado"
-              desc="Ya viene en el iPad (iOS 16+). Apple Pencil excelente. Boton de compartir como imagen integrado."
+              tag="Recomendado"
+              desc="Viene con el iPad. Excelente Apple Pencil. Comparte la pagina directamente como imagen."
             />
-            <AppCard
+            <AppTile
               emoji="📝"
               name="Apple Notes"
-              badge="Tambien funciona"
-              desc="Usa la seccion de dibujo dentro de una nota. Luego compartir la imagen y ejecutar el Shortcut."
+              tag="Tambien OK"
+              desc="Usa el area de dibujo dentro de una nota. Manten pulsado el dibujo para compartirlo como imagen."
             />
           </div>
-        </Section>
+        </Card>
 
-        {/* Step 1 */}
-        <Section number="1" title="Configurar el Service Account (una vez)">
-          <p className="text-sm text-gray-600 mt-1">
-            El service account crea los Google Docs. Necesitas compartir una carpeta de tu Drive con el.
+        {/* Service account */}
+        <Card>
+          <SectionTitle number="1" text="Configurar Service Account (una vez)" />
+          <p className="text-sm text-gray-500 mt-1 mb-3">
+            Es la cuenta que crea los Google Docs. La configuras una sola vez.
           </p>
-          <ol className="mt-3 space-y-2 text-sm text-gray-700 list-decimal list-inside">
-            <li>
+          <Steps>
+            <Step n={1}>
               Ve a{" "}
               <a
                 href="https://console.cloud.google.com"
                 target="_blank"
                 rel="noreferrer"
-                className="text-blue-600 underline"
+                className="text-blue-600 underline font-medium"
               >
                 console.cloud.google.com
               </a>
               {" "}&#8594; APIs &amp; Services &#8594; Credentials
-            </li>
-            <li>Crea un <strong>Service Account</strong> &#8594; descarga la clave JSON</li>
-            <li>Habilita <strong>Cloud Vision API</strong>, <strong>Google Docs API</strong> y <strong>Google Drive API</strong></li>
-            <li>
-              En Vercel, anade <code className="bg-gray-100 px-1 rounded">GOOGLE_SERVICE_ACCOUNT_KEY</code>{" "}
-              pegando todo el contenido del JSON
-            </li>
-            <li>
-              Email del service account (compartelo con tu carpeta de Drive):
-              <CodeBlock>{SERVICE_ACCOUNT_EMAIL}</CodeBlock>
-            </li>
-            <li>
-              En Google Drive, crea una carpeta &quot;Notas iPad&quot; &#8594; compartir con ese email &#8594; rol <strong>Editor</strong>
-            </li>
-            <li>
-              Copia el ID de la carpeta desde la URL{" "}
-              <code className="bg-gray-100 px-1 rounded">drive.google.com/drive/folders/ESTE-ID</code>{" "}
-              y ponlo en <code className="bg-gray-100 px-1 rounded">GOOGLE_DRIVE_FOLDER_ID</code> en Vercel
-            </li>
-          </ol>
-        </Section>
+            </Step>
+            <Step n={2}>
+              Crea un <strong>Service Account</strong> &#8594; descarga la clave JSON
+            </Step>
+            <Step n={3}>
+              Habilita las 3 APIs:{" "}
+              <Pill>Cloud Vision API</Pill>{" "}
+              <Pill>Google Docs API</Pill>{" "}
+              <Pill>Google Drive API</Pill>
+            </Step>
+            <Step n={4}>
+              En Vercel &#8594; Settings &#8594; Env Vars &#8594; pega el JSON completo en{" "}
+              <Pill>GOOGLE_SERVICE_ACCOUNT_KEY</Pill>
+            </Step>
+            <Step n={5}>
+              Comparte una carpeta de Google Drive con este email (rol Editor):
+              <CopyBox value={SA_EMAIL} />
+            </Step>
+            <Step n={6}>
+              Copia el ID de la carpeta desde la URL de Drive y ponlo en{" "}
+              <Pill>GOOGLE_DRIVE_FOLDER_ID</Pill> en Vercel.
+              <p className="text-xs text-gray-400 mt-1">
+                La URL tiene este formato:{" "}
+                <span className="font-mono">drive.google.com/drive/folders/&lt;ESTE-ID&gt;</span>
+              </p>
+            </Step>
+          </Steps>
+        </Card>
 
-        {/* Step 2 */}
-        <Section number="2" title="Tu API Key para el Shortcut">
-          <p className="text-sm text-gray-600 mt-1">
-            Esta clave identifica las llamadas desde el iPad. Copia este valor para el siguiente paso.
+        {/* API Key */}
+        <Card>
+          <SectionTitle number="2" text="Tu API Key para el Shortcut" />
+          <p className="text-sm text-gray-500 mt-1 mb-2">
+            Copia esta clave. La necesitas en el Shortcut del siguiente paso.
           </p>
-          <CodeBlock selectable>{API_KEY}</CodeBlock>
-          <p className="text-xs text-gray-400 mt-1">
-            Si aparece &quot;no configurado&quot;: Vercel &#8594; Settings &#8594; Environment Variables &#8594;
-            anade <code>API_KEY</code> con cualquier string aleatorio &#8594; redeploy.
-          </p>
-        </Section>
+          <CopyBox value={API_KEY} large />
+          {API_KEY.includes("falta") && (
+            <p className="text-xs text-amber-600 mt-2 bg-amber-50 rounded-lg px-3 py-2">
+              Anade <strong>API_KEY</strong> en Vercel &#8594; Environment Variables con cualquier
+              string aleatorio (p.ej. genera uno con{" "}
+              <span className="font-mono">openssl rand -hex 20</span>) y vuelve a hacer deploy.
+            </p>
+          )}
+        </Card>
 
-        {/* Step 3 */}
-        <Section number="3" title="Crear el iOS Shortcut">
-          <p className="text-sm text-gray-600 mt-1 mb-3">
-            Abre la app <strong>Atajos</strong> en el iPad y crea un nuevo Shortcut con estas acciones en orden:
+        {/* Shortcut steps */}
+        <Card>
+          <SectionTitle number="3" text="Crear el Shortcut en el iPad" />
+          <p className="text-sm text-gray-500 mt-1 mb-3">
+            Abre la app <strong className="text-gray-700">Atajos</strong> &#8594; nuevo atajo &#8594; agrega estas acciones en orden:
           </p>
           <div className="space-y-2">
-            <ShortcutAction
-              step={1}
-              label="Recibir: Imagenes y PDFs como entrada"
-              note='Habilitar "Hoja de compartir" para que aparezca al compartir desde Freeform'
+            <ActionRow
+              n={1}
+              title="Recibir Imagenes como entrada"
+              desc='Marca "Hoja de compartir" para que aparezca en el menu Compartir.'
             />
-            <ShortcutAction
-              step={2}
-              label="Si no hay entrada, Detener y responder"
-              note="Manejo de error basico: accion Si + Detener"
+            <ActionRow
+              n={2}
+              title="Codificar [Entrada Atajo] en Base64"
+              desc="Accion: Codificar — Formato: Base64 — sin saltos de linea."
             />
-            <ShortcutAction
-              step={3}
-              label="Codificar [Entrada Atajo] en Base64"
-              note="Accion Codificar, formato Base64, sin saltos de linea"
-            />
-            <ShortcutAction
-              step={4}
-              label="Obtener contenido de URL"
-              note={
+            <ActionRow
+              n={3}
+              title="Obtener contenido de URL"
+              desc={
                 "URL: " + ENDPOINT + "\n" +
                 "Metodo: POST\n" +
-                "Cabeceras: Authorization = Bearer " + API_KEY + "\n" +
-                'Cuerpo: JSON > clave "image" = [resultado Base64 del paso 3]'
+                "Encabezados: Authorization = Bearer " + API_KEY + "\n" +
+                "Cuerpo: JSON\n" +
+                '  Clave: "image"\n' +
+                "  Valor: [resultado Base64 del paso 2]"
               }
             />
-            <ShortcutAction
-              step={5}
-              label="Obtener valor del diccionario"
-              note='Clave: "docUrl" del resultado del paso anterior'
+            <ActionRow
+              n={4}
+              title='Obtener "docUrl" del diccionario'
+              desc='Accion: Obtener valor del diccionario — Clave: docUrl'
             />
-            <ShortcutAction
-              step={6}
-              label="Abrir URL"
-              note="Pasa el docUrl del paso 5. Abrira el Google Doc en Safari."
+            <ActionRow
+              n={5}
+              title="Abrir URL"
+              desc="Usa el valor del paso 4. Abre el Google Doc directamente en Safari."
             />
           </div>
-        </Section>
+        </Card>
 
-        {/* Step 4 */}
-        <Section number="4" title="Flujo de uso">
-          <div className="mt-2 space-y-3">
-            <FlowStep icon="✏️" text="Escribe a mano en Freeform con el Apple Pencil" />
+        {/* Usage flow */}
+        <Card>
+          <SectionTitle number="4" text="Como usarlo" />
+          <div className="mt-3 space-y-2">
+            <FlowRow icon="✏️" text="Escribe a mano en Freeform con el Apple Pencil" />
             <FlowArrow />
-            <FlowStep icon="&#8593;" text='Pulsa Compartir y selecciona el Shortcut "Notes to Docs"' />
+            <FlowRow icon="&#8679;" text='Pulsa el boton Compartir y elige el Shortcut "Notes to Docs"' />
             <FlowArrow />
-            <FlowStep icon="⏳" text="Espera ~3 segundos mientras se procesa el OCR..." />
+            <FlowRow icon="⏳" text="Espera 2-4 segundos — el OCR esta trabajando" />
             <FlowArrow />
-            <FlowStep icon="📄" text="Se abre el Google Doc con el texto reconocido" />
+            <FlowRow icon="📄" text="Se abre el Google Doc con el texto transcrito" />
           </div>
-          <p className="text-xs text-gray-400 mt-4">
-            Con Apple Notes: termina de escribir &#8594; toca el dibujo &#8594; Compartir como Imagen &#8594; selecciona el Shortcut.
+          <p className="text-xs text-gray-400 mt-4 border-t border-gray-100 pt-3">
+            Con Apple Notes: termina la nota &#8594; manten pulsado el area de dibujo &#8594;
+            Compartir como Imagen &#8594; selecciona el Shortcut.
           </p>
-        </Section>
+        </Card>
 
-        <div className="text-center text-xs text-gray-400 pb-6">
-          Problemas? Revisa que las APIs esten habilitadas y que el service account tenga acceso a la carpeta de Drive.
-        </div>
+        {/* Footer note */}
+        <p className="text-xs text-gray-400 text-center">
+          Si algo no funciona, revisa que las 3 APIs esten habilitadas en Google Cloud y
+          que el service account tenga acceso Editor a la carpeta de Drive.
+        </p>
 
       </div>
     </div>
   );
 }
 
-// ---- Sub-components ----
+// ─── Sub-components ────────────────────────────────────────────
 
-function Section({ number, title, children }: { number: string; title: string; children: ReactNode }) {
+function Card({ children }: { children: ReactNode }) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-      <div className="flex items-center gap-2 mb-1">
-        <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
-          {number}
-        </span>
-        <h2 className="font-semibold text-gray-900">{title}</h2>
-      </div>
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 space-y-1">
       {children}
     </div>
   );
 }
 
-function CodeBlock({ children, selectable }: { children: ReactNode; selectable?: boolean }) {
+function SectionTitle({ number, text }: { number: string; text: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+        {number}
+      </span>
+      <h2 className="text-base font-semibold text-gray-900">{text}</h2>
+    </div>
+  );
+}
+
+function Pill({ children }: { children: ReactNode }) {
+  return (
+    <code className="inline-block bg-gray-100 text-gray-700 text-xs px-1.5 py-0.5 rounded-md font-mono">
+      {children}
+    </code>
+  );
+}
+
+function CopyBox({ value, large }: { value: string; large?: boolean }) {
   return (
     <pre
       className={
-        "mt-2 bg-gray-900 text-green-400 text-sm rounded-xl p-3 overflow-x-auto whitespace-pre-wrap break-all" +
-        (selectable ? " select-all cursor-copy" : "")
+        "mt-2 bg-gray-900 text-green-400 rounded-xl p-4 overflow-x-auto whitespace-pre-wrap break-all select-all cursor-copy " +
+        (large ? "text-sm font-semibold" : "text-xs")
       }
     >
-      {children}
+      {value}
     </pre>
   );
 }
 
-function AppCard({ emoji, name, badge, desc }: { emoji: string; name: string; badge: string; desc: string }) {
+function AppTile({ emoji, name, tag, desc }: { emoji: string; name: string; tag: string; desc: string }) {
   return (
-    <div className="border border-gray-200 rounded-xl p-3">
-      <div className="flex items-center gap-1 mb-1">
-        <span className="text-xl">{emoji}</span>
-        <span className="font-medium text-sm">{name}</span>
-        <span className="ml-auto text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">{badge}</span>
+    <div className="border border-gray-200 rounded-xl p-3 space-y-1">
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <span className="text-xl leading-none">{emoji}</span>
+        <span className="text-sm font-semibold text-gray-800">{name}</span>
+        <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-medium">
+          {tag}
+        </span>
       </div>
-      <p className="text-xs text-gray-500">{desc}</p>
+      <p className="text-xs text-gray-500 leading-relaxed">{desc}</p>
     </div>
   );
 }
 
-function ShortcutAction({ step, label, note }: { step: number; label: string; note?: string }) {
+function Steps({ children }: { children: ReactNode }) {
+  return <ol className="space-y-3 mt-1">{children}</ol>;
+}
+
+function Step({ n, children }: { n: number; children: ReactNode }) {
   return (
-    <div className="flex gap-3 bg-gray-50 rounded-xl p-3">
-      <span className="text-xs font-mono text-gray-400 mt-0.5 w-4 flex-shrink-0">{step}.</span>
-      <div>
-        <p className="text-sm font-medium text-gray-800">{label}</p>
-        {note && <p className="text-xs text-gray-500 mt-0.5 whitespace-pre-line">{note}</p>}
+    <li className="flex gap-3 text-sm text-gray-700">
+      <span className="flex-shrink-0 w-5 h-5 rounded-full bg-gray-200 text-gray-600 text-xs font-bold flex items-center justify-center mt-0.5">
+        {n}
+      </span>
+      <div className="flex-1 leading-relaxed">{children}</div>
+    </li>
+  );
+}
+
+function ActionRow({ n, title, desc }: { n: number; title: string; desc?: string }) {
+  return (
+    <div className="flex gap-3 bg-gray-50 rounded-xl px-4 py-3">
+      <span className="text-sm font-mono text-gray-400 flex-shrink-0 w-5 text-right mt-0.5">
+        {n}.
+      </span>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-gray-800">{title}</p>
+        {desc && (
+          <p className="text-xs text-gray-500 mt-1 whitespace-pre-line leading-relaxed">{desc}</p>
+        )}
       </div>
     </div>
   );
 }
 
-function FlowStep({ icon, text }: { icon: string; text: string }) {
+function FlowRow({ icon, text }: { icon: string; text: string }) {
   return (
-    <div className="flex items-start gap-3 bg-gray-50 rounded-xl p-3">
-      <span className="text-lg w-8 text-center flex-shrink-0">{icon}</span>
-      <p className="text-sm text-gray-700">{text}</p>
+    <div className="flex items-start gap-3 bg-gray-50 rounded-xl px-4 py-3">
+      <span className="text-base w-6 text-center flex-shrink-0 leading-relaxed">{icon}</span>
+      <p className="text-sm text-gray-700 leading-relaxed">{text}</p>
     </div>
   );
 }
 
 function FlowArrow() {
-  return <div className="text-center text-gray-300 text-lg">&#8595;</div>;
+  return (
+    <div className="text-center text-gray-300 text-lg leading-none py-1">&#8595;</div>
+  );
 }
