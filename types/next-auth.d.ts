@@ -1,15 +1,3 @@
-import "next-auth";
-
-declare module "next-auth" {
-  interface Session {
-    accessToken?: string;
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    accessToken?: string;
-    refreshToken?: string;
-    expiresAt?: number;
-  }
-}
+// No extra fields needed on the session — Google API calls
+// are handled by the service account, not the user's OAuth token.
+export {};

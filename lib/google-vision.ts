@@ -1,4 +1,9 @@
-export async function recognizeText(imageBase64: string, accessToken: string): Promise<string> {
+import { getServiceAccountToken } from "./service-account";
+
+export async function recognizeText(imageBase64: string): Promise<string> {
+  const accessToken = await getServiceAccountToken();
+
+  // Strip data URI prefix if present
   const imageData = imageBase64.replace(/^data:image\/\w+;base64,/, "");
 
   const response = await fetch(

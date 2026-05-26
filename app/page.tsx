@@ -3,6 +3,7 @@
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useState } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 
 const DrawingCanvas = dynamic(() => import("@/components/DrawingCanvas"), {
   ssr: false,
@@ -86,12 +87,17 @@ export default function Home() {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100 bg-gray-50">
         <span className="text-sm font-semibold text-gray-800">notestodocs</span>
-        <button
-          onClick={() => signOut()}
-          className="text-xs text-gray-400 active:text-gray-600"
-        >
-          {session.user?.email} · Salir
-        </button>
+        <div className="flex items-center gap-3">
+          <Link href="/setup" className="text-xs text-blue-500">
+            Configurar Shortcut →
+          </Link>
+          <button
+            onClick={() => signOut()}
+            className="text-xs text-gray-400 active:text-gray-600"
+          >
+            {session.user?.email} · Salir
+          </button>
+        </div>
       </div>
 
       {/* Canvas area */}

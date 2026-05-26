@@ -1,20 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-
-// Allow up to 10 MB for image payloads (App Router segment config)
-export const maxDuration = 30; // seconds
 import { authOptions } from "@/lib/auth";
 import { recognizeText } from "@/lib/google-vision";
 import { createGoogleDoc } from "@/lib/google-docs";
 
+export const maxDuration = 30;
+
+function isAuthorized(req: NextRequest, session: Awaited<ReturnType<typeof getServerSession>>): boolean {
+  // Path 1: logged-in user via the web canvas
+  if (session !== null) return true;
+
+  // Path 2: iOS Shortcut with static API key
+  const apiKey = process.env.API_KEY;
+  if (apiKey) {
+    const authHeader = req.headers.get("authorization") ?? "";
+    const keyFromHeader = authHeader.replace(/^Bearer\s+/i, "").trim();
+    if (keyFromHeader === apiKey) return true;
+
+    // Also accept as query param for easier Shortcut setup
+    const keyFromQuery = req.nextUrl.searchParams.get("key");
+    if (keyFromQuery === apiKey) return true;
+  }
+
+  return false;
+}
+
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
 
-  if (!session?.accessToken) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  if (!isAuthorized(req, session)) {
+    return NextResponse.json({ error: "Not authorized" }, { status: 401 });
   }
-
-  const accessToken = session.accessToken;
 
   let imageBase64: string;
   let title: string;
@@ -33,7 +49,7 @@ export async function POST(req: NextRequest) {
 
   let text: string;
   try {
-    text = await recognizeText(imageBase64, accessToken);
+    text = await recognizeText(imageBase64);
   } catch (err) {
     return NextResponse.json(
       { error: `OCR failed: ${(err as Error).message}` },
@@ -43,14 +59,14 @@ export async function POST(req: NextRequest) {
 
   if (!text.trim()) {
     return NextResponse.json(
-      { error: "No se detectó texto en la imagen. Intenta escribir con más contraste." },
+      { error: "No se detectó texto. Asegúrate de que la escritura sea legible y con contraste." },
       { status: 422 }
     );
   }
 
   let docUrl: string;
   try {
-    docUrl = await createGoogleDoc(title, text, accessToken);
+    docUrl = await createGoogleDoc(title, text);
   } catch (err) {
     return NextResponse.json(
       { error: `Google Docs error: ${(err as Error).message}` },
